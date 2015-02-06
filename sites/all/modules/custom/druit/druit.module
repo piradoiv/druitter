@@ -1,0 +1,14 @@
+<?php
+/**
+ * Implements hook_node_info().
+ */
+function druit_node_info() {
+  return array(
+    'druit' => array(
+      'name' => t('Druit'),
+      'base' => 'druit',
+      'description' => t('Tell what you think in a short message.'),
+      'has_title' => FALSE,
+    ),
+  );
+}

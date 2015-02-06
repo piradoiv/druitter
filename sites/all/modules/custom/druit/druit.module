@@ -1,0 +1,88 @@
+<?php
+/**
+ * Implements hook_node_info().
+ */
+function druit_node_info() {
+  return array(
+    'druit' => array(
+      'name' => t('Druit'),
+      'base' => 'druit',
+      'description' => t('Tell what you think in a short message.'),
+      'has_title' => FALSE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function druit_block_info() {
+  $blocks['druit_new'] = array(
+    'info' => t('New druit'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function druit_block_view($delta = '') {
+  $block = array();
+
+  if ($delta == 'druit_new') {
+    $block['subject'] = t('New druit');
+    $block['content'] = drupal_get_form('druit_content_form');
+  }
+
+  return $block;
+}
+
+/**
+ * This is the form to create a new Druit.
+ */
+function druit_content_form() {
+  $form['druit'] = array(
+    '#title' => t('Your druit'),
+    '#description' => t('Tell the whole world what you want to say in @limit characters.',
+        array('@limit' => 140)),
+    '#type' => 'textarea',
+    '#attributes' => array('maxlength' => 140),
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+
+  return $form;
+}
+
+/**
+ * Form validation.
+ */
+function druit_content_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  if (strlen($values['druit']) > 140) {
+    form_set_error('druit', t('Druits should have less than @limit characters.',
+      array('@limit' => 140)));
+  }
+}
+
+/**
+ * Stores the Druit into the database.
+ */
+function druit_content_form_submit($form, &$form_state) {
+  $values = $form_state['values'];
+
+  $node = new stdClass;
+  $node->type = 'druit';
+  node_object_prepare($node);
+
+  $node->language = 'und';
+  $node->druit[$node->language][0]['value'] = $values['druit'];
+
+  node_save($node);
+  drupal_goto("node/{$node->nid}");
+}

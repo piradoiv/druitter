@@ -1,0 +1,44 @@
+<?php
+/**
+ * Implements hook_install().
+ */
+function druit_install() {
+  // We want to make sure our new content type is available.
+  node_types_rebuild();
+
+  // Add Druit field.
+  $field = field_info_field('druit');
+  if (empty($field)) {
+    $field = field_create_field(array(
+      'field_name' => 'druit',
+      'type' => 'text',
+      'entity_types' => array('node'),
+      'locked' => TRUE,
+      'settings' => array('max_length' => 140),
+    ));
+  }
+
+  // Add a Druit field instance to Druit content type.
+  $instance = field_info_instance('node', 'druit', 'druit');
+  if (empty($instance)) {
+    $instance = field_create_instance(array(
+      'field_name' => 'druit',
+      'entity_type' => 'node',
+      'bundle' => 'druit',
+      'label' => 'Druit',
+      'description' => t('Tell the whole world what you want to say in @limit characters.',
+        array('@limit' => 140)),
+      'widget' => array('type' => 'text_textarea'),
+      'required' => TRUE,
+    ));
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function druit_uninstall() {
+  $instance = field_info_instance('node', 'druit', 'druit');
+  field_delete_instance($instance);
+  field_delete_field('druit');
+}

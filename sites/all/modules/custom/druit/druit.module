@@ -101,23 +101,19 @@ function druit_content_form_submit($form, &$form_state) {
  */
 function druit_list() {
   $query = new EntityFieldQuery();
-  $results = $query->entityCondition('entity_type', 'node')
+  $result = $query->entityCondition('entity_type', 'node')
     ->propertyCondition('type', 'druit')
     ->propertyOrderBy('nid', 'DESC')
-    ->pager(2)
+    ->pager(3)
     ->execute();
 
-  foreach ($results['node'] as $node) {
-    $node_list[] = $node->nid;
+  if (empty($result)) {
+    return array();
   }
 
-  $nodes = node_load_multiple($node_list);
-
-  $render = array();
-  foreach ($nodes as $node) {
-    $druit = field_view_field('node', $node, 'druit');
-    $druit[0]['#markup'] = check_markup($druit[0]['#markup'], 'druitter');
-    $render['druits']["druit_{$node->nid}"] = $druit;
+  foreach ($result['node'] as $nid) {
+    $node = node_load($nid->nid);
+    $render['nodes'][] = node_view($node, 'full');
   }
 
   $render['pager'] = array(
@@ -146,8 +142,8 @@ function druit_filter_info() {
  */
 function druit_filter_druitter($text, $filter, $format) {
   $patterns = array(
-    '/@([a-z0-9]+)/', // User links
-    '/#([a-z0-9]+)/', // Hashtag links
+    '/@([a-zA-Z0-9]+)/', // User links
+    '/#([a-zA-Z0-9]+)/', // Hashtag links
   );
   $replacements = array(
     '<a href="/${0}">${0}</a>',
@@ -156,4 +152,33 @@ function druit_filter_druitter($text, $filter, $format) {
 
   $text = preg_replace($patterns, $replacements, $text);
   return $text;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function druit_field_formatter_info() {
+  return array(
+    'druit' => array(
+      'label' => t('Druit'),
+      'field types' => array('text'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function druit_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  if ($display['type'] == 'druit') {
+    foreach ($items as $delta => $item) {
+      $output = check_markup($item['value'], 'druitter');
+      $element[$delta] = array('#markup' => $output);
+    }
+  }
+
+  return $element;
 }

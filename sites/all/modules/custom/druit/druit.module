@@ -72,6 +72,10 @@ function druit_content_form() {
  * Form validation.
  */
 function druit_content_form_validate($form, &$form_state) {
+  if (!user_access('create druit content')) {
+    form_set_error('druit', t('You are not authorized to publish content.'));
+  }
+
   $values = $form_state['values'];
   if (strlen($values['druit']) > 140) {
     form_set_error('druit', t('Druits should have less than @limit characters.',

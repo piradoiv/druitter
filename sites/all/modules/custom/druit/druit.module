@@ -21,6 +21,10 @@ function druit_block_info() {
     'info' => t('New druit'),
   );
 
+  $blocks['druit_list'] = array(
+    'info' => t('Recent druits'),
+  );
+
   return $blocks;
 }
 
@@ -33,6 +37,11 @@ function druit_block_view($delta = '') {
   if ($delta == 'druit_new') {
     $block['subject'] = t('New druit');
     $block['content'] = drupal_get_form('druit_content_form');
+  }
+
+  if ($delta == 'druit_list') {
+    $block['subject'] = t('Recent druits');
+    $block['content'] = druit_list();
   }
 
   return $block;
@@ -85,4 +94,35 @@ function druit_content_form_submit($form, &$form_state) {
 
   node_save($node);
   drupal_goto("node/{$node->nid}");
+}
+
+/**
+ * List of recent druits.
+ */
+function druit_list() {
+  $query = new EntityFieldQuery();
+  $results = $query->entityCondition('entity_type', 'node')
+    ->propertyCondition('type', 'druit')
+    ->propertyOrderBy('nid', 'DESC')
+    ->pager(2)
+    ->execute();
+
+  foreach ($results['node'] as $node) {
+    $node_list[] = $node->nid;
+  }
+
+  $nodes = node_load_multiple($node_list);
+
+  $render = array();
+  foreach ($nodes as $node) {
+    $druit = field_view_field('node', $node, 'druit');
+    $render["druit_{$node->nid}"] = $druit;
+  }
+
+  $render['pager'] = array(
+    '#theme' => 'pager',
+    '#weight' => 10,
+  );
+
+  return $render;
 }

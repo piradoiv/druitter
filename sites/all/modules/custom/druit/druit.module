@@ -116,7 +116,8 @@ function druit_list() {
   $render = array();
   foreach ($nodes as $node) {
     $druit = field_view_field('node', $node, 'druit');
-    $render["druit_{$node->nid}"] = $druit;
+    $druit[0]['#markup'] = check_markup($druit[0]['#markup'], 'druitter');
+    $render['druits']["druit_{$node->nid}"] = $druit;
   }
 
   $render['pager'] = array(
@@ -125,4 +126,34 @@ function druit_list() {
   );
 
   return $render;
+}
+
+/**
+ * Implements hook_filter_info().
+ */
+function druit_filter_info() {
+  $filters['filter_druitter'] = array(
+    'title' => t('Twitter like filter'),
+    'description' => t('Converts #hashtags and @usernames in internal links.'),
+    'process callback' => 'druit_filter_druitter',
+  );
+
+  return $filters;
+}
+
+/**
+ * Implements the processing.
+ */
+function druit_filter_druitter($text, $filter, $format) {
+  $patterns = array(
+    '/@([a-z0-9]+)/', // User links
+    '/#([a-z0-9]+)/', // Hashtag links
+  );
+  $replacements = array(
+    '<a href="/${0}">${0}</a>',
+    '<a href="/s/${1}">${0}</a>',
+  );
+
+  $text = preg_replace($patterns, $replacements, $text);
+  return $text;
 }

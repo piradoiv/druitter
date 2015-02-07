@@ -104,7 +104,7 @@ function druit_list() {
   $result = $query->entityCondition('entity_type', 'node')
     ->propertyCondition('type', 'druit')
     ->propertyOrderBy('nid', 'DESC')
-    ->pager(3)
+    ->pager(20)
     ->execute();
 
   if (empty($result)) {

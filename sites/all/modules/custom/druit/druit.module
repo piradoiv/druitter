@@ -103,7 +103,7 @@ function druit_list() {
   $query = new EntityFieldQuery();
   $result = $query->entityCondition('entity_type', 'node')
     ->propertyCondition('type', 'druit')
-    ->propertyOrderBy('nid', 'DESC')
+    ->propertyOrderBy('created', 'DESC')
     ->pager(20)
     ->execute();
 

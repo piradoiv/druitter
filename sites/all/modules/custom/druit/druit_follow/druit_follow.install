@@ -36,7 +36,6 @@ function druit_follow_schema() {
         'columns' => array('uid' => 'fid'),
       ),
     ),
-    'primary key' => array('uid'),
   );
   return $schema;
 }

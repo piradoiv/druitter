@@ -40,8 +40,13 @@ function druit_block_view($delta = '') {
   }
 
   if ($delta == 'druit_list') {
+    $user_id = NULL;
+    if (arg(0) == 'user') {
+      $user_id = arg(1);
+    }
+
     $block['subject'] = t('Recent druits');
-    $block['content'] = druit_list();
+    $block['content'] = druit_list($user_id);
   }
 
   return $block;
@@ -103,8 +108,12 @@ function druit_content_form_submit($form, &$form_state) {
 /**
  * List of recent druits.
  */
-function druit_list() {
-  $follows = druit_follow_list();
+function druit_list($user_id = NULL) {
+  if (!$user_id) {
+    $follows = druit_follow_list();
+  } else {
+    $follows = array($user_id);
+  }
 
   $result = db_select('node', 'n')
     ->fields('n', array('nid'))

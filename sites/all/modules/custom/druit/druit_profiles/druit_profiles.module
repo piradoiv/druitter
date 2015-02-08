@@ -1,0 +1,44 @@
+<?php
+/**
+ * Implements hook_menu().
+ */
+function druit_profiles_menu() {
+  $items['user/%user/mentions'] = array(
+    'title' => 'Mentions',
+    'page callback' => 'druit_profiles_mentions',
+    'page arguments' => array(1),
+    // 'access arguments' => array('access content'),
+    'access callback' => TRUE,
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Show mentions.
+ */
+function druit_profiles_mentions($user) {
+  $query = new EntityFieldQuery;
+  $result = $query->entityCondition('entity_type', 'node')
+    ->propertyCondition('type', 'druit')
+    ->fieldCondition('druit', 'value', "%@{$user->name}%", 'LIKE')
+    ->pager(20)
+    ->execute();
+
+  if (empty($result)) {
+    return array();
+  }
+
+  foreach ($result['node'] as $nid) {
+    $node = node_load($nid->nid);
+    $render['nodes'][] = node_view($node, 'full');
+  }
+
+  $render['pager'] = array(
+    '#theme' => 'pager',
+    '#weight' => 10,
+  );
+
+  return $render;
+}

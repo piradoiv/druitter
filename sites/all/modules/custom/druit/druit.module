@@ -104,9 +104,12 @@ function druit_content_form_submit($form, &$form_state) {
  * List of recent druits.
  */
 function druit_list() {
+  $follows = druit_follow_list();
+
   $result = db_select('node', 'n')
     ->fields('n', array('nid'))
     ->condition('type', 'druit')
+    ->condition('uid', $follows, 'IN')
     ->orderBy('created', 'DESC')
     ->extend('PagerDefault')
     ->limit(20)

@@ -1,0 +1,102 @@
+<?php
+/**
+ * Implements hook_permission().
+ */
+function druit_follow_permission() {
+  return array(
+    'follow users' => array(
+      'title' => t('Follow users'),
+      'description' => t('Follow and unfollow users.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function druit_follow_block_info() {
+  // This example comes from node.module.
+  $blocks['druit_follow'] = array(
+    'info' => t('Follow button'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function druit_follow_block_view($delta = '') {
+  $block = array();
+
+  if ($delta == 'druit_follow') {
+    $block['subject'] = t('Follow');
+    $block['content'] = drupal_get_form('druit_follow_button_form');
+  }
+
+  return $block;
+}
+
+/**
+ * Follow/unfollow button form.
+ */
+function druit_follow_button_form($form, &$form_state) {
+  $user_id = arg(1);
+  $verb = druit_follow_is_following($user_id) ? 'Unfollow' : 'Follow';
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t($verb),
+  );
+
+  return $form;
+}
+
+/**
+ * Validates form.
+ */
+function druit_follow_button_form_validate($form, &$form_state) {
+  if (!user_access('follow users')) {
+    form_set_error('submit', t('You don\'t have permission to follow users.'));
+  }
+}
+
+/**
+ * Submits form.
+ */
+function druit_follow_button_form_submit($form, &$form_state) {
+  global $user;
+  $follow_id = arg(1);
+  $is_following = druit_follow_is_following($follow_id);
+
+  if (!$is_following) {
+    db_insert('users_follows')
+      ->fields(array(
+        'uid' => $user->uid,
+        'fid' => $follow_id,
+        'created' => time(),
+      ))
+      ->execute();
+  } else {
+    db_delete('users_follows')
+      ->condition('uid', $user->uid)
+      ->condition('fid', $follow_id)
+      ->execute();
+  }
+}
+
+function druit_follow_is_following($user_id) {
+  global $user;
+  $count = db_select('users_follows', 'uf')
+    ->fields('uf', array('uid', 'fid'))
+    ->condition('uid', $user->uid)
+    ->condition('fid', $user_id)
+    ->execute()
+    ->rowCount();
+
+  if ($count === 1) {
+    return TRUE;
+  }
+
+  return FALSE;
+}

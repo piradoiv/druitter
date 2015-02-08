@@ -108,8 +108,8 @@ function druit_follow_is_following($user_id) {
  * Returns an array of the logged user follows.
  */
 function druit_follow_list($user_id = NULL) {
+  global $user;
   if (!$user_id) {
-    global $user;
     $user_id = $user->uid;
   }
 
@@ -123,6 +123,9 @@ function druit_follow_list($user_id = NULL) {
   foreach ($result as $current) {
     $users[] = $current->fid;
   }
+
+  // Adds the logged user to the list.
+  $users[] = $user->uid;
 
   return $users;
 }

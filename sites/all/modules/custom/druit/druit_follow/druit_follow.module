@@ -85,6 +85,9 @@ function druit_follow_button_form_submit($form, &$form_state) {
   }
 }
 
+/**
+ * Checks if the logged user is following $user_id.
+ */
 function druit_follow_is_following($user_id) {
   global $user;
   $count = db_select('users_follows', 'uf')

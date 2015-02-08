@@ -52,7 +52,7 @@ function druit_block_view($delta = '') {
  */
 function druit_content_form() {
   $form['druit'] = array(
-    '#title' => t('Your druit'),
+    '#title' => t('Your message'),
     '#description' => t('Tell the whole world what you want to say in @limit characters.',
         array('@limit' => 140)),
     '#type' => 'textarea',
@@ -104,18 +104,20 @@ function druit_content_form_submit($form, &$form_state) {
  * List of recent druits.
  */
 function druit_list() {
-  $query = new EntityFieldQuery();
-  $result = $query->entityCondition('entity_type', 'node')
-    ->propertyCondition('type', 'druit')
-    ->propertyOrderBy('created', 'DESC')
-    ->pager(20)
-    ->execute();
+  $result = db_select('node', 'n')
+    ->fields('n', array('nid'))
+    ->condition('type', 'druit')
+    ->orderBy('created', 'DESC')
+    ->extend('PagerDefault')
+    ->limit(20)
+    ->execute()
+    ->fetchAll();
 
   if (empty($result)) {
     return array();
   }
 
-  foreach ($result['node'] as $nid) {
+  foreach ($result as $nid) {
     $node = node_load($nid->nid);
     $render['nodes'][] = node_view($node, 'full');
   }

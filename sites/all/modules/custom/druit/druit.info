@@ -5,3 +5,4 @@ version = 7.x-1.0
 package = Druitter
 dependencies[] = druit_filter
 dependencies[] = druit_follow
+dependencies[] = druit_profiles

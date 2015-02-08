@@ -103,3 +103,26 @@ function druit_follow_is_following($user_id) {
 
   return FALSE;
 }
+
+/**
+ * Returns an array of the logged user follows.
+ */
+function druit_follow_list($user_id = NULL) {
+  if (!$user_id) {
+    global $user;
+    $user_id = $user->uid;
+  }
+
+  $result = db_select('users_follows', 'uf')
+    ->fields('uf', array('fid'))
+    ->condition('uid', $user_id)
+    ->execute()
+    ->fetchAll();
+
+  $users = array();
+  foreach ($result as $current) {
+    $users[] = $current->fid;
+  }
+
+  return $users;
+}

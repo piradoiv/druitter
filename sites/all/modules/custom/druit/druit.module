@@ -43,7 +43,10 @@ function druit_block_view($delta = '') {
     $user_id = NULL;
     if (arg(0) == 'user') {
       $user_id = arg(1);
+    } elseif (!drupal_is_front_page() && arg(0) == 'node') {
+      return array();
     }
+
 
     $block['subject'] = t('Recent druits');
     $block['content'] = druit_list($user_id);

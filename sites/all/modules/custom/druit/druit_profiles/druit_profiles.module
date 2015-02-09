@@ -7,8 +7,7 @@ function druit_profiles_menu() {
     'title' => 'Mentions',
     'page callback' => 'druit_profiles_mentions',
     'page arguments' => array(1),
-    // 'access arguments' => array('access content'),
-    'access callback' => TRUE,
+    'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK,
   );
 
